@@ -12,7 +12,8 @@ public class Durak
     public static Deck deck = new Deck();
     public static boolean attackerSkipped = false;
     public static boolean isValidMultiCardDefense = false;
-    public static String trumpCard = "";
+    public static String trumpCard;
+    public static ColoredString coloredTrumpCard;
 
     public static void main(String[] args)
     {
@@ -20,6 +21,7 @@ public class Durak
         deck.dealCards(player2);
         
         trumpCard = deck.getTrumpCard().toString();
+        coloredTrumpCard = new ColoredString(trumpCard, ConsoleColors.RED);
         
         player1.setTrumps();
         player2.setTrumps();
@@ -76,6 +78,7 @@ public class Durak
     
     public static void playRound(Player attacker, Player defender)
     {
+        @SuppressWarnings("resource")
         Scanner input = new Scanner(System.in);
         
         while(true)
@@ -121,8 +124,6 @@ public class Durak
                 
                 theAttack.clear();
                 theDefense.clear();
-                
-                continue;
             }
             else
             {
@@ -133,11 +134,12 @@ public class Durak
     
     public static void makeAttackMove(Player p)
     {
+        @SuppressWarnings("resource")
         Scanner input = new Scanner(System.in);
         
         System.out.println("Player " + p.getPlayerID() + "'s turn to attack!");
         
-        System.out.println("The trump card is '" + trumpCard + "'.");
+        System.out.println("The trump card is '" + coloredTrumpCard.getColoredText() + "'.");
         
         if(!theDefense.isEmpty())
         {
@@ -149,7 +151,7 @@ public class Durak
         }
         
         System.out.println("Player " + p.getPlayerID() + ", you have the following cards:");
-        System.out.println(p.getCards());
+        System.out.println(p.getHand().printCards());
         
         while(true)
         {
@@ -171,33 +173,33 @@ public class Durak
                     cardsForAttack.add(temp[i]);
                 }
                 
-                for(int i = 0; i < cardsForAttack.size() - 1; i++)
+                if(!theDefense.isEmpty())
                 {
-                    if(!theDefense.isEmpty())
+                    for(int i = 0; i < cardsForAttack.size(); i++)
                     {
-                        for(int j = 0; j < theDefense.size(); j++)
+                        if(theDefense.get(0).getRank() == new Card(cardsForAttack.get(i)).getRank())
                         {
-                            if(theDefense.get(j).getRank() == new Card(cardsForAttack.get(i)).getRank())
-                            {
-                                isValidMultiCardAttack = true;
-                                multiCardAttack(p, cardsForAttack);
-                                break;
-                            }
+                            isValidMultiCardAttack = true;
+                            multiCardAttack(p, cardsForAttack);
+                            break;
                         }
                     }
-                    else if(!defenseCardBank.isEmpty())
+                }
+                else if(!defenseCardBank.isEmpty())
+                {
+                    for(int i = 0; i < cardsForAttack.size(); i++)
                     {
-                        for(int j = 0; j < defenseCardBank.size(); j++)
+                        if(defenseCardBank.get(0).getRank() == new Card(cardsForAttack.get(i)).getRank())
                         {
-                            if(defenseCardBank.get(j).getRank() == new Card(cardsForAttack.get(i)).getRank())
-                            {
-                                isValidMultiCardAttack = true;
-                                multiCardAttack(p, cardsForAttack);
-                                break;
-                            }
+                            isValidMultiCardAttack = true;
+                            multiCardAttack(p, cardsForAttack);
+                            break;
                         }
                     }
-                    else
+                }
+                else
+                {
+                    for(int i = 0; i < cardsForAttack.size() - 1; i++)
                     {
                         if(cardsForAttack.get(i).substring(0, cardsForAttack.get(i).length() - 1).equals(cardsForAttack.get(i + 1).substring(0, cardsForAttack.get(i + 1).length() - 1)) && !cardsForAttack.get(i).equals(cardsForAttack.get(i + 1)))
                         {
@@ -206,35 +208,29 @@ public class Durak
                             break;
                         }
                     }
-                    
-                    break;
                 }
                 
                 if(!isValidMultiCardAttack)
                 {
                     System.out.println("That is not a valid attack. Please try again.");
                     theAttack.clear();
-                    continue;
                 }
                 else
                 {
                     break;
                 }
             }
-            else if((cardNotInHand(p, playerMove) || playerMove.equals("") || playerMove == null) && (!playerMove.equals("take") && !playerMove.equals("skip")))
+            else if((cardNotInHand(p, playerMove) || playerMove.equals("")) && (!playerMove.equals("take") && !playerMove.equals("skip")))
             {
                 System.out.println("You do not have that card or you entered an invalid card. Please try again.");
-                continue;
             }
             else if(playerMove.equals("take"))
             {
                 System.out.println("You cannot take, you are attacking!");
-                continue;
             }
             else if(theDefense.isEmpty() && defenseCardBank.isEmpty() && playerMove.equals("skip"))
             {
                 System.out.println("You cannot skip your attack because it is the first move. Please try again.");
-                continue;
             }
             else if((!theDefense.isEmpty() || !defenseCardBank.isEmpty()) && playerMove.equals("skip"))
             {
@@ -272,7 +268,6 @@ public class Durak
                 if(!isValidAttack)
                 {
                     System.out.println("That is not a valid attack. The rank of your attacking card must match the rank of the defending card. Please try again.");
-                    continue;
                 }
                 else
                 {
@@ -286,11 +281,12 @@ public class Durak
     
     public static void makeDefendMove(Player p)
     {
+        @SuppressWarnings("resource")
         Scanner input = new Scanner(System.in);
         
         System.out.println("Player " + p.getPlayerID() + "'s turn to defend!");
         
-        System.out.println("The trump card is '" + trumpCard + "'.");
+        System.out.println("The trump card is '" + coloredTrumpCard.getColoredText() + "'.");
         
         if(!theAttack.isEmpty())
         {
@@ -302,7 +298,7 @@ public class Durak
         }
         
         System.out.println("Player " + p.getPlayerID() + ", you have the following cards:");
-        System.out.println(p.getCards());
+        System.out.println(p.getHand().printCards());
         
         while(true)
         {
@@ -346,7 +342,7 @@ public class Durak
                 theDefense.clear();
                 break;
             }
-            else if(cardNotInHand(p, playerMove) && !playerMove.equals("take") && !playerMove.equals("skip") && !playerMove.equals("") && playerMove != null)
+            else if(cardNotInHand(p, playerMove) && !playerMove.equals("take") && !playerMove.equals("skip") && !playerMove.equals(""))
             {
                 System.out.println("You do not have that card or you entered an invalid card. Please try again.");
                 continue;
@@ -371,7 +367,6 @@ public class Durak
             {
                 System.out.println("That is not a valid defense. Please try again.");
                 theDefense.clear();
-                continue;
             }
         }
     }
@@ -522,10 +517,9 @@ public class Durak
     {
         String[] wordList = word.split("");
         
-        for(int i = 0; i < wordList.length; i++)
+        for(String wordList1 : wordList)
         {
-            if(wordList[i] != null && wordList[i].equals(key))
-            {
+            if (wordList1 != null && wordList1.equals(key)) {
                 return true;
             }
         }

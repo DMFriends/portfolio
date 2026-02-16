@@ -70,4 +70,35 @@ public class Hand
 	    
 	    return sorted;
 	}
+
+	public String printCards()
+	{
+		String cardsList = "";
+
+		cardsList += "[";
+
+		for(Card card : playerCards)
+		{
+			if(card.isTrump())
+			{
+				ColoredString coloredCard = new ColoredString(card.toString(), ConsoleColors.RED);
+				cardsList += coloredCard.getColoredText();
+			}
+			else
+			{
+				cardsList += card.toString();
+			}
+
+			if(!card.equals(playerCards.get(playerCards.size() - 1)))
+			{
+				cardsList += ", ";
+			}
+			else
+			{
+				cardsList += "]";;
+			}
+		}
+	    
+		return cardsList;
+	}
 }
